@@ -1,81 +1,54 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-/* =====================
-   Tipos
-===================== */
 type Session = {
   id: string;
   role: "guest" | "user";
+  name: string | null;
 };
 
 type SessionContextType = {
   session: Session;
   login: (id: string) => void;
+  setName: (name: string) => void;
 };
 
-/* =====================
-   Utils
-===================== */
+const SessionContext = createContext<SessionContextType | null>(null);
+
 function generateGuestSession(): Session {
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     role: "guest",
+    name: null,
   };
 }
 
-function loadSession(): Session {
-  try {
-    const stored = localStorage.getItem("session");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (
-        typeof parsed?.id === "string" &&
-        (parsed.role === "guest" || parsed.role === "user")
-      ) {
-        return parsed as Session;
-      }
-    }
-  } catch {
-    // ignora erro e recria
-  }
-  return generateGuestSession();
-}
-
-/* =====================
-   Context (NUNCA null)
-===================== */
-const SessionContext = createContext<SessionContextType>({
-  session: {
-    id: "boot",
-    role: "guest",
-  },
-  login: () => {},
-});
-
-/* =====================
-   Provider
-===================== */
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session>(() => loadSession());
+  const [session, setSession] = useState<Session>(() => {
+    const stored = localStorage.getItem("session");
+    return stored ? JSON.parse(stored) : generateGuestSession();
+  });
 
   useEffect(() => {
     localStorage.setItem("session", JSON.stringify(session));
   }, [session]);
 
   function login(id: string) {
-    setSession({ id, role: "user" });
+    setSession((s) => ({ ...s, id, role: "user" }));
+  }
+
+  function setName(name: string) {
+    setSession((s) => ({ ...s, name }));
   }
 
   return (
-    <SessionContext.Provider value={{ session, login }}>
+    <SessionContext.Provider value={{ session, login, setName }}>
       {children}
     </SessionContext.Provider>
   );
 }
 
-/* =====================
-   Hook
-===================== */
 export function useSession() {
-  return useContext(SessionContext);
+  const ctx = useContext(SessionContext);
+  if (!ctx) throw new Error("useSession must be used inside SessionProvider");
+  return ctx;
 }

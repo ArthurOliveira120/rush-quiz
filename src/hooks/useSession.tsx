@@ -3,11 +3,13 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 type Session = {
   id: string;
   role: "guest" | "user";
+  name?: string | null;
 };
 
 type SessionContextType = {
   session: Session;
   login: (id: string) => void;
+  setName: (name: string | null) => void;
 };
 
 const SessionContext = createContext<SessionContextType | null>(null);
@@ -16,6 +18,7 @@ function generateGuestSession(): Session {
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     role: "guest",
+    name: null,
   };
 }
 
@@ -25,7 +28,6 @@ function getStoredSession(): Session | null {
     if (!stored) return null;
 
     const parsed = JSON.parse(stored);
-    // Validar se tem os campos obrigatórios
     if (parsed?.id && parsed?.role) {
       return parsed as Session;
     }
@@ -42,19 +44,26 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    try {
-      localStorage.setItem("session", JSON.stringify(session));
-    } catch (error) {
-      console.error("Erro ao salvar sessão:", error);
-    }
+    localStorage.setItem("session", JSON.stringify(session));
   }, [session]);
 
   function login(id: string) {
-    setSession({ id, role: "user" });
+    setSession(prev => ({
+      ...prev,
+      id,
+      role: "user",
+    }));
+  }
+
+  function setName(name: string | null) {
+    setSession(prev => ({
+      ...prev,
+      name,
+    }));
   }
 
   return (
-    <SessionContext.Provider value={{ session, login }}>
+    <SessionContext.Provider value={{ session, login, setName }}>
       {children}
     </SessionContext.Provider>
   );
