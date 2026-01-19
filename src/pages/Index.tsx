@@ -2,8 +2,12 @@ import { Header } from "../components/Header";
 import { Button } from "../components/Button";
 
 import styles from "./Index.module.css";
+import { useSession } from "../contexts/SessionContext";
+
 
 export function Index() {
+const { session } = useSession();
+
   return (
     <>
       <Header></Header>
@@ -17,6 +21,9 @@ export function Index() {
               placeholder="PIN da sala"
             ></input>
             <Button className={styles.enterRoomButton}>Entrar na sala</Button>
+          </div>
+          <div>
+            {session?.id}
           </div>
       </div>
     </>

@@ -20,10 +20,6 @@ export function Header() {
     <div className={styles.header}>
       <div className={styles.buttons}>
         <Button variant="secondary">Criar</Button>
-
-        <Button variant="secondary" className={styles.loginButton}>
-          Login
-        </Button>
       </div>
     </div>
   );
