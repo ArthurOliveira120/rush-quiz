@@ -17,6 +17,13 @@
   padding: 1.45rem;
   gap: 1rem;
   border-radius: 0.3rem;
+  border: solid var(--border-soft) 1px;
+  box-shadow: var(--shadow-soft);
+  transition: box-shadow 0.3s ease;
+}
+
+.enterPin:hover {
+  box-shadow: var(--shadow-strong);
 }
 
 .inputRoomPin {
