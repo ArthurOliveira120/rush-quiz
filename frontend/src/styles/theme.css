@@ -1,5 +1,12 @@
 :root {
   /* === FUNDOS PRINCIPAIS === */
+  --main-bg: linear-gradient(
+    180deg,
+    #020617,
+    #020617,
+    #020617
+  );
+
   --bg-primary: #05080F;        /* Preto azulado (fundo geral) */
   --bg-secondary: #0A1222;      /* Azul marinho escuro */
   --bg-tertiary: #0F1B33;       /* Azul profundo para cards */

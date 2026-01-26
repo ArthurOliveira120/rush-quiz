@@ -1,13 +1,10 @@
 import { Button } from "../components/Button";
-import { SessionNameInput } from "../components/SessionNameInput";
 
 import styles from "./Index.module.css";
-import { useSession } from "../contexts/SessionContext";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
 
 export function Index() {
-  const { session } = useSession();
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -15,8 +12,6 @@ export function Index() {
     <>
       <div className={styles.container}>
         <h1>Quiz</h1>
-
-        <SessionNameInput />
 
         <div className={styles.enterPin}>
           <input
@@ -33,11 +28,6 @@ export function Index() {
           >
             Entrar na sala
           </Button>
-        </div>
-
-        <br></br>
-        <div>
-          <strong>Session Name:</strong> {session.id}
         </div>
       </div>
     </>

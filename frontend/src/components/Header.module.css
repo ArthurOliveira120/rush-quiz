@@ -3,8 +3,16 @@
   align-items: center;
   width: 100%;
   padding: 1rem 2rem;
-  height: 5rem;
-  background-color: var(--bg-primary);
+  height: 9rem;
+  background-color: var(--bg-secondary);
+}
+
+.mainTitle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 1.25rem;
 }
 
 .buttons {
@@ -14,20 +22,34 @@
   gap: 1rem;
 }
 
-.myGamesButton {
+.headerButtons {
+  display: flex;
   margin-left: auto;
+  gap: 1rem;
 }
 
 .link {
   text-decoration: none;
   color: var(--accent-secondary);
-  font-size: 2rem;
+  font-size: 2.5rem;
   text-shadow: 0 2px 20px var(--accent-primary);
+}
+
+.userArea {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.username {
+  color: var(--accent-secondary);
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 @media (max-width: 480px) {
   .link {
-    font-size: 1.5rem
+    font-size: 1.5rem;
   }
 
   .myGamesButton {
