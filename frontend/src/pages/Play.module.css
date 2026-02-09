@@ -1,7 +1,7 @@
 .container {
   min-height: 100vh;
   background: linear-gradient(135deg, #0f172a, #020617);
-  color: #e5e7eb;
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -9,8 +9,6 @@
   padding: 24px;
   gap: 24px;
 }
-
-/* ===== SALA / AGUARDANDO ===== */
 
 .waiting {
   text-align: center;
@@ -27,8 +25,6 @@
   opacity: 0.8;
 }
 
-/* ===== PERGUNTA ===== */
-
 .question {
   background: #020617;
   border: 1px solid #1e293b;
@@ -44,8 +40,6 @@
   font-size: 1.6rem;
   line-height: 1.4;
 }
-
-/* ===== OPÇÕES ===== */
 
 .options {
   display: grid;
@@ -76,8 +70,6 @@
   transform: scale(0.98);
 }
 
-/* ===== RESPONSIVO ===== */
-
 @media (max-width: 500px) {
   .question h1 {
     font-size: 1.3rem;
@@ -89,7 +81,6 @@
   }
 }
 
-/* ===== SELECIONADO ===== */
 .selected {
   background: var(--accent);
   color: #fff;
@@ -98,19 +89,16 @@
   transform: scale(1.04);
 }
 
-/* ===== DESABILITADOS ===== */
 .opt:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-/* não selecionados após voto */
 .opt:disabled:not(.selected) {
   opacity: 0.4;
   filter: grayscale(0.6);
 }
 
-/* ===== RESULTADO ===== */
 .result {
   margin-top: 24px;
   font-size: 1.2rem;
@@ -125,7 +113,6 @@
   color: #ef4444;
 }
 
-/* Container geral já existe, isso é só pra garantir alinhamento */
 .container {
   min-height: 100vh;
   background: linear-gradient(180deg, #0f172a, #020617);
@@ -136,7 +123,6 @@
   justify-content: center;
 }
 
-/* Título */
 .rankingTitle {
   font-size: 2.2rem;
   font-weight: 700;
@@ -144,7 +130,6 @@
   text-align: center;
 }
 
-/* Lista do ranking */
 .ranking {
   list-style: none;
   padding: 0;
@@ -153,7 +138,6 @@
   max-width: 360px;
 }
 
-/* Item do ranking */
 .rankingItem {
   background: #020617;
   border: 1px solid #1e293b;
@@ -172,25 +156,21 @@
   animation: fadeUp 0.4s ease both;
 }
 
-/* Posição (1º, 2º, etc) */
 .position {
   font-weight: 700;
   margin-right: 12px;
   min-width: 24px;
 }
 
-/* Nome do jogador */
 .playerName {
   flex: 1;
 }
 
-/* Pontuação */
 .score {
   font-weight: 700;
   color: #22c55e;
 }
 
-/* Destaques do pódio */
 .first {
   border-color: #facc15;
   background: linear-gradient(135deg, #facc15 0%, #ca8a04 100%);
@@ -209,7 +189,6 @@
   color: #020617;
 }
 
-/* Animação suave */
 @keyframes fadeUp {
   from {
     opacity: 0;

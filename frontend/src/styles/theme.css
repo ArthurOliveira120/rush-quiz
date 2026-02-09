@@ -1,16 +1,13 @@
 :root {
   /* === FUNDOS PRINCIPAIS === */
-  --main-bg: linear-gradient(
-    180deg,
-    #020617,
-    #020617,
-    #020617
-  );
+  --main-bg: linear-gradient(135deg, #0f172a, #020617);
 
   --bg-primary: #05080F;        /* Preto azulado (fundo geral) */
   --bg-secondary: #0A1222;      /* Azul marinho escuro */
   --bg-tertiary: #0F1B33;       /* Azul profundo para cards */
   --bg-overlay: rgba(5, 8, 15, 0.85);
+
+  --bg-question: #020617;
 
   /* === FUNDOS DE CONTRASTE / CAMADAS === */
   --bg-elevated-1: #121A2E;   /* Azul escuro claro – cards */
@@ -62,10 +59,12 @@
   /* === BORDAS E DIVISORES === */
   --border-default: #1F2A44;
   --border-highlight: #00C2FF;
+  --border-question: solid #1e293b 1px;
 
   /* === SOMBRAS === */
-  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-soft: 0 6px 30px rgba(0, 0, 0, 0.4);
   --shadow-strong: 0 0 30px rgba(0, 194, 255, 0.2);
+  --shadow-question: 0 10px 30px rgba(0, 0, 0, 0.4);
 
   /* === ESTADOS === */
   --disabled: #2A3147;

@@ -1,9 +1,16 @@
 .card {
   display: flex;
-  width: fit-content;
-  margin: auto;
+  justify-content: space-between;
   align-items: center;
+  
+  width: 100%;
+  max-width: 30rem;
+  min-width: 23rem;
+  min-height: 8rem;
+
+  margin: auto;
   padding: 1.5rem;
+
   background-color: var(--bg-elevated-2);
   border-radius: 0.3rem;
   border: solid var(--border-soft) 1px;
@@ -19,11 +26,17 @@
   display: flex;
   gap: 1.25rem;
   font-size: 1.5rem;
+  max-width: 60%;
+}
+
+.cardInfos h4:last-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cardButtons {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-left: 6rem;
 }

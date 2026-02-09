@@ -1,4 +1,3 @@
-/* === BASE DO BOTÃO === */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -14,7 +13,6 @@
   box-shadow: var(--shadow-soft);
 }
 
-/* === TAMANHOS === */
 .btn-sm {
   padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
@@ -30,7 +28,6 @@
   font-size: 1.05rem;
 }
 
-/* === VARIANTES === */
 .btn-primary {
   background: var(--btn-primary);
   color: var(--text-primary);
@@ -70,7 +67,6 @@
   color: #ffffff;
 }
 
-/* === ESTADOS === */
 .btn:disabled,
 .btn-loading {
   background: var(--disabled);

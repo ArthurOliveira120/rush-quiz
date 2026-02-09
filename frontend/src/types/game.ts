@@ -6,20 +6,18 @@ export type Game = {
     is_public: boolean;
 }
 
-export type Option = {
-  id: number;
-  text: string;
-  order: number;
-};
-
 export type Question = {
-  id: number;
+  id: string;
+  game_id: string;
+  order: number;
   text: string;
-  options: Option[];
+  options?: Option[];
 };
 
-export type GameState = {
-  started: boolean;
-  finished: boolean;
-  currentQuestion?: Question;
+export type Option = {
+  id: string;
+  question_id: string;
+  order: number;
+  text: string;
+  is_correct: boolean;
 };

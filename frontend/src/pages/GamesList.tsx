@@ -8,9 +8,12 @@ import { useGames } from "../hooks/useGames";
 
 import { useState } from "react";
 
+import { useNavigate } from "react-router-dom";
+
 export function GamesList() {
   const { games, loading } = useGames();
   const [loadingGame, setLoadingGame] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -38,8 +41,7 @@ export function GamesList() {
             ))
           )}
 
-          <Button size="md" variant="outline">
-            {" "}
+          <Button size="md" variant="outline" onClick={() => navigate("/games/new")}>
             + Novo jogo
           </Button>
         </div>
