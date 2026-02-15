@@ -3,6 +3,8 @@ import styles from "./Card.module.css";
 import { Button } from "./Button";
 import { useNavigate } from "react-router-dom";
 import type { Dispatch, SetStateAction } from "react";
+import { supabase } from "../services/supabase";
+import { useGames } from "../hooks/useGames";
 
 type cardProps = {
   index: number;
@@ -13,6 +15,7 @@ type cardProps = {
 
 export function Card({ index, gameId, title, setLoadingGame }: cardProps) {
   const navigate = useNavigate();
+  const { fetchGames } = useGames();
 
   async function handleStartGame() {
     setLoadingGame(true);
@@ -40,6 +43,16 @@ export function Card({ index, gameId, title, setLoadingGame }: cardProps) {
     navigate(`/host/${data.pin}`);
   }
 
+  async function handleDeleteGame(gameId: string) {
+    setLoadingGame(true);
+    
+    const { error } = await supabase.from("games").delete().eq("id", gameId);
+
+    if (error) console.error(error.message);
+    fetchGames()
+    setLoadingGame(false);
+  }
+
   return (
     <div className={styles.card}>
       <div className={styles.cardInfos}>
@@ -50,8 +63,10 @@ export function Card({ index, gameId, title, setLoadingGame }: cardProps) {
         <Button size="sm" onClick={handleStartGame}>
           Jogar
         </Button>
-        <Button size="sm">Editar</Button>
-        <Button size="sm">Excluir</Button>
+        <Button size="sm" onClick={() => {
+          navigate(`/games/${gameId}/edit`)
+        }}>Editar</Button>
+        <Button size="sm" onClick={() => handleDeleteGame(gameId)}>Excluir</Button>
       </div>
     </div>
   );

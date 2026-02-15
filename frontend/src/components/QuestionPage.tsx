@@ -3,23 +3,27 @@ import styles from "./QuestionPage.module.css";
 import { Button } from "./Button";
 
 type Option = {
-  id: number;
+  id: string;
   text: string;
   is_correct: boolean;
+  order: number;
 };
 
 type Question = {
-  id: number;
+  id: string;
   text: string;
+  order: number;
   options: Option[];
+  persisted: boolean;
 };
 
 type QuestionProps = {
   question: Question;
   onChangeQuestion: (updatedQuestion: Question) => void;
+  handleDeleteQuestion: (questionId: string) => void;
 };
 
-export function QuestionPage({ question, onChangeQuestion }: QuestionProps) {
+export function QuestionPage({ question, onChangeQuestion, handleDeleteQuestion }: QuestionProps) {
 
   function handleChangeQuestionText(text: string) {
     onChangeQuestion({
@@ -51,7 +55,7 @@ export function QuestionPage({ question, onChangeQuestion }: QuestionProps) {
     });
   }
 
-  function handleRemoveOption(optionId: number) {
+  function handleRemoveOption(optionId: string) {
     const newOptions = question.options.filter((o) => o.id !== optionId);
 
     onChangeQuestion({
@@ -61,14 +65,16 @@ export function QuestionPage({ question, onChangeQuestion }: QuestionProps) {
   }
 
   function handleAddOption() {
+    if (question.options.length >= 6) return;
     onChangeQuestion({
       ...question,
       options: [
         ...question.options,
         {
-          id: Date.now(),
+          id: `temp-${crypto.randomUUID()}`,
           text: "",
           is_correct: false,
+          order: question.options.length + 1,
         },
       ],
     });
@@ -122,13 +128,24 @@ export function QuestionPage({ question, onChangeQuestion }: QuestionProps) {
         ))}
       </div>
 
-      <Button
-        variant="outline"
-        className={styles.button}
-        onClick={handleAddOption}
-      >
-        + Nova Opção
-      </Button>
+      <div className={styles.buttons}>
+        <Button
+          variant="outline"
+          className={styles.button}
+          onClick={handleAddOption}
+          disabled={question.options.length >= 6}
+        >
+          + Nova Opção
+        </Button>
+
+        <Button
+          variant="outline"
+          className={styles.button}
+          onClick={() => handleDeleteQuestion(question.id)}
+        >
+          🗑️ Apagar
+        </Button>
+      </div>
     </div>
   );
 }

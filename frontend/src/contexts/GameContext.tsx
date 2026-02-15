@@ -9,6 +9,7 @@ type GameContextType = {
   games: Game[];
   loading: boolean;
   error: string | null;
+  fetchGames: () => void;
 };
 
 type GameProviderProps = {
@@ -19,6 +20,7 @@ export const GameContext = createContext<GameContextType>({
   games: [],
   loading: false,
   error: null,
+  fetchGames: () => {}
 });
 
 export function GameProvider({ children }: GameProviderProps) {
@@ -28,33 +30,33 @@ export function GameProvider({ children }: GameProviderProps) {
 
   const { session } = useSession();
 
-  useEffect(() => {
-    async function fetchGames() {
-      if (!session) return;
+  async function fetchGames() {
+    if (!session) return;
 
-      try {
-        const { data, error } = await supabase
-          .from("games")
-          .select("*")
-          .eq("user_id", session.user.id);
+    try {
+      const { data, error } = await supabase
+        .from("games")
+        .select("*")
+        .eq("user_id", session.user.id);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        if (data) {
-          setGames(data);
-        }
-      } catch (error: any) {
-        setError(error.message ?? "Erro ao buscar jogos.");
-      } finally {
-        setLoading(false);
+      if (data) {
+        setGames(data);
       }
+    } catch (error: any) {
+      setError(error.message ?? "Erro ao buscar jogos.");
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     fetchGames();
   }, [session]);
 
   return (
-    <GameContext.Provider value={{ games, loading, error }}>
+    <GameContext.Provider value={{ games, loading, error, fetchGames }}>
       {children}
     </GameContext.Provider>
   );

@@ -81,6 +81,7 @@ export function Play() {
             }
           : prev,
       );
+      setResult({ correctOptionId: correctOptionId })
     }
 
     function onRanking(ranking: Ranking) {

@@ -4,7 +4,6 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { Index } from "../pages/Index";
 import { GamesList } from "../pages/GamesList";
 import { NewGame } from "../pages/NewGame";
-import { EditGame } from "../pages/EditGame";
 import { Host } from "../pages/Host";
 import { Play } from "../pages/Play";
 import { SignIn } from "../pages/SignIn";
@@ -43,16 +42,16 @@ export function AppRoutes() {
         path="/games/new"
         element={
           <ProtectedRoute>
-            <NewGame />
+            <NewGame type="create"/>
           </ProtectedRoute>
         }
       />
 
       <Route
-        path="/games/:id/edit"
+        path="/games/:gameId/edit"
         element={
           <ProtectedRoute>
-            <EditGame />
+            <NewGame type="edit" />
           </ProtectedRoute>
         }
       />

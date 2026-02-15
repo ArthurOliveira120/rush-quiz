@@ -2,14 +2,14 @@
 
 Plataforma de quiz multiplayer em tempo real, inspirada no Kahoot, desenvolvida em React, Node.js, Socket.IO e Supabase.
 
-🔗 **Demo:** https://rush-quiz.vercel.app  
+🔗 **Demo:** https://rush-quiz.vercel.app
 🧪 **Modo teste:** entre em uma sala e jogue com amigos
 
 ## Funcionalidades
 
 - Criação de jogos e salas com PIN
 - Quiz multiplayer em tempo real
-- Host controla perguntas e fluxo do jogo
+- Controle de perguntas e fluxo pelo Host
 - Jogadores respondem pelo celular
 - Ranking final com top 5
 - Comunicação via WebSockets
@@ -74,7 +74,7 @@ npm run dev
 
 ## Status do projeto
 
-Em desenvolvimento ativo, com novas funcionalidades sendo adicionadas (melhorias visuais, tempo, pontuação, criação/edição de jogos, etc)
+Em desenvolvimento ativo, com novas funcionalidades sendo adicionadas (melhorias visuais, tempo, pontuação, etc).
 
 ## Autores
 

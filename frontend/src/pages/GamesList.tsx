@@ -27,7 +27,7 @@ export function GamesList() {
                 sx={{ color: "blue" }}
                 style={{ margin: "2rem auto", display: "block" }}
               />
-              <p>Loading games...</p>
+              <p>Carregando jogo...</p>
             </div>
           ) : (
             games.map((item, index) => (
