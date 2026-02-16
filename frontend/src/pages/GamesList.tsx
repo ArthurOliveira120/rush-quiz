@@ -30,20 +30,26 @@ export function GamesList() {
               <p>Carregando jogo...</p>
             </div>
           ) : (
-            games.map((item, index) => (
-              <Card
-                key={index + 1}
-                index={index + 1}
-                gameId={item.id}
-                title={item.title}
-                setLoadingGame={setLoadingGame}
-              />
-            ))
-          )}
+            <>
+              {games.map((item, index) => (
+                <Card
+                  key={index + 1}
+                  index={index + 1}
+                  gameId={item.id}
+                  title={item.title}
+                  setLoadingGame={setLoadingGame}
+                />
+              ))}
 
-          <Button size="md" variant="outline" onClick={() => navigate("/games/new")}>
-            + Novo jogo
-          </Button>
+              <Button
+                size="md"
+                variant="outline"
+                onClick={() => navigate("/games/new")}
+              >
+                + Novo jogo
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </>

@@ -34,6 +34,7 @@ export function Index() {
             maxLength={6}
           />
           <Button
+          variant="secondary"
             className={styles.enterRoomButton}
             onClick={() => {
               if (

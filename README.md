@@ -2,8 +2,8 @@
 
 Plataforma de quiz multiplayer em tempo real, inspirada no Kahoot, desenvolvida em React, Node.js, Socket.IO e Supabase.
 
-🔗 **Demo:** https://rush-quiz.vercel.app
-🧪 **Modo teste:** entre em uma sala e jogue com amigos
+- 🔗 **Demo:** https://rush-quiz.vercel.app
+- 🧪 **Modo teste:** entre em uma sala e jogue com amigos
 
 ## Funcionalidades
 

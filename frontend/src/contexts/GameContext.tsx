@@ -32,6 +32,7 @@ export function GameProvider({ children }: GameProviderProps) {
 
   async function fetchGames() {
     if (!session) return;
+    setLoading(true);
 
     try {
       const { data, error } = await supabase

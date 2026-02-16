@@ -8,6 +8,7 @@ import { QuestionPage } from "../components/QuestionPage";
 import { supabase } from "../services/supabase";
 
 import { useSession } from "../hooks/useSession";
+import { useGames } from "../hooks/useGames";
 
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -32,6 +33,7 @@ type NewGameProps = {
 
 export function NewGame({ type }: NewGameProps) {
   const { session } = useSession();
+  const { fetchGames } = useGames();
 
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
@@ -40,7 +42,7 @@ export function NewGame({ type }: NewGameProps) {
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(1);
-  const [loading, setLoading] = useState(type === "edit");
+  const [loading, setLoading] = useState(true);
   const [deletedQuestionIds, setDeletedQuestionIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -79,6 +81,7 @@ export function NewGame({ type }: NewGameProps) {
           persisted: false,
         },
       ]);
+      setLoading(false);
     } else {
       async function fetchGame(gameId?: string) {
         if (!gameId) return;
@@ -156,6 +159,7 @@ export function NewGame({ type }: NewGameProps) {
     }
 
     try {
+      setLoading(true);
       if (type === "create") {
         const { data: game, error } = await supabase
           .from("games")
@@ -286,6 +290,9 @@ export function NewGame({ type }: NewGameProps) {
       navigate("/");
     } catch (error: any) {
       console.error("Error: ", error.message);
+    } finally {
+      setLoading(false);
+      fetchGames();
     }
   }
 
