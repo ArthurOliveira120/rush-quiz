@@ -12,6 +12,7 @@ export type Question = {
   order: number;
   text: string;
   options: Option[];
+  endTime: number;
 };
 
 export type Option = {

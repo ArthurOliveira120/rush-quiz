@@ -287,7 +287,7 @@ export function NewGame({ type }: NewGameProps) {
         }
       }
 
-      navigate("/");
+      navigate("/games");
     } catch (error: any) {
       console.error("Error: ", error.message);
     } finally {
@@ -364,7 +364,7 @@ export function NewGame({ type }: NewGameProps) {
     }
 
     setQuestions((prev) => prev.filter((q) => q.id !== questionId));
-    setCurrentQuestion((prev) => prev - 1);
+    if (currentQuestion !== 1) setCurrentQuestion((prev) => prev - 1);
   }
 
   return (

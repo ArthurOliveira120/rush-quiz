@@ -200,4 +200,7 @@
   }
 }
 
-
+.bar {
+  width: 26rem;
+  margin: auto;
+}

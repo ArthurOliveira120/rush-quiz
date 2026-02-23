@@ -8,67 +8,26 @@ import styles from "./Host.module.css";
 import { Button } from "../components/Button";
 
 import type { Question } from "../types/game";
+import { Timer } from "../components/Timer";
+
+type QuestionResult = {
+  correctOptionId: string;
+  resultsEndTime: number;
+};
 
 export function Host() {
   const { pin } = useParams<{ pin: string }>();
-  const socket = useSocket();
   const { session } = useSession();
+  const socket = useSocket();
   const navigate = useNavigate();
 
   const [players, setPlayers] = useState<string[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
+
   const [question, setQuestion] = useState<Question | null>(null);
 
+  const [results, setResults] = useState<QuestionResult | null>(null);
   const [ranking, setRanking] = useState<{ name: string; score: number }[]>([]);
-
-  console.log("PIN:", pin);
-  console.log("socket connected?", socket.connected);
-
-  useEffect(() => {
-    if (!pin || !session) return;
-
-    socket.emit("host_join", { pin });
-
-    socket.on("host_joined", ({ pin }) => {
-      console.log("✅ Host confirmado na sala", pin);
-    });
-
-    socket.on("players_update", setPlayers);
-
-    socket.on("game_started", () => {
-      setGameStarted(true);
-      socket.emit("next_question", { pin });
-    });
-
-    socket.on("question", (question: Question) => {
-      setQuestion(question);
-    });
-
-    socket.on("join_error", (err) => {
-      alert(err.message);
-      navigate("/");
-    });
-
-    socket.on("ranking", setRanking);
-
-    return () => {
-      socket.off("players_update");
-      socket.off("game_started");
-      socket.off("question");
-      socket.off("join_error");
-      socket.off("ranking");
-    };
-  }, [pin, session, socket]);
-
-  useEffect(() => {
-    socket.on("player_answered", ({ playerName }) => {
-      console.log(`${playerName} respondeu`);
-    });
-
-    return () => {
-      socket.off("player_answered");
-    };
-  }, [socket]);
 
   function handleStartGame() {
     if (!pin) {
@@ -89,6 +48,56 @@ export function Host() {
     socket.emit("next_question", { pin });
   }
 
+  function handleFinishQuestion() {
+    if (!pin) return;
+    socket.emit("finish_question", { pin });
+  }
+
+  useEffect(() => {
+    if (!pin || !session) return;
+
+    socket.emit("host_join", { pin });
+
+    socket.on("players_update", setPlayers);
+
+    socket.on("game_started", () => {
+      setGameStarted(true);
+      socket.emit("next_question", { pin });
+    });
+
+    socket.on("question", (question: Question) => {
+      setResults(null);
+      setQuestion(question);
+    });
+
+    socket.on("join_error", (err) => {
+      alert(err.message);
+      navigate("/");
+    });
+
+    socket.on(
+      "question_result",
+      ({ correctOptionId, resultsEndTime }: QuestionResult) => {
+        setResults({ correctOptionId, resultsEndTime });
+      },
+    );
+
+    socket.on("game_finished", () => socket.emit("show_ranking", { pin }));
+
+    socket.on("ranking", setRanking);
+
+    return () => {
+      socket.off("host_joined");
+      socket.off("players_update");
+      socket.off("game_started");
+      socket.off("question");
+      socket.off("join_error");
+      socket.off("question_results");
+      socket.off("game_finished");
+      socket.off("ranking");
+    };
+  }, [pin, session, socket]);
+
   return (
     <div className={styles.container}>
       <h1>Host — Sala {pin}</h1>
@@ -106,7 +115,7 @@ export function Host() {
       </div>
 
       <div className={styles.controls}>
-        {!gameStarted ? (
+        {!gameStarted && (
           <Button
             variant="primary"
             size="lg"
@@ -114,10 +123,6 @@ export function Host() {
             onClick={handleStartGame}
           >
             Iniciar Jogo
-          </Button>
-        ) : (
-          <Button variant="secondary" size="lg" onClick={handleNextQuestion}>
-            Próxima Pergunta
           </Button>
         )}
       </div>
@@ -133,21 +138,26 @@ export function Host() {
               </div>
             ))}
           </div>
-          <Button
-            variant="secondary"
-            size="lg"
-            onClick={() => socket.emit("finish_question", { pin })}
-          >
-            Finalizar Pergunta
-          </Button>
 
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => socket.emit("show_ranking", { pin })}
-          >
-            Mostrar Ranking
-          </Button>
+          {!results && (
+            <div className={styles.bar}>
+              <Timer
+                endTime={question.endTime}
+                duration={15000}
+                onFinish={handleFinishQuestion}
+              ></Timer>
+            </div>
+          )}
+        </div>
+      )}
+
+      {results && (
+        <div className={styles.bar}>
+          <Timer
+            endTime={results.resultsEndTime}
+            duration={10000}
+            onFinish={handleNextQuestion}
+          ></Timer>
         </div>
       )}
 

@@ -5,20 +5,13 @@ import { useParams } from "react-router-dom";
 import { useSocket } from "../hooks/useSocket";
 import { useSession } from "../hooks/useSession";
 
-type Option = {
-  id: number;
-  text: string;
-  is_correct: boolean;
-};
+import { Timer } from "../components/Timer";
 
-type Question = {
-  id: number;
-  text: string;
-  options: Option[];
-};
+import type { Question } from "../types/game";
 
 type QuestionResult = {
-  correctOptionId: number;
+  correctOptionId: string;
+  resultsEndTime: number;
 };
 
 type Ranking = {
@@ -34,10 +27,13 @@ export function Play() {
   const joinedRef = useRef(false);
 
   const [question, setQuestion] = useState<Question | null>(null);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
   const [result, setResult] = useState<QuestionResult | null>(null);
   const [ranking, setRanking] = useState<{ name: string; score: number }[]>([]);
+  
   const [playerId, setPlayerId] = useState<string | null>(null);
+  const [timeUp, setTimeup] = useState(false);
 
   const playerName = session
     ? session.user.user_metadata.username
@@ -67,9 +63,13 @@ export function Play() {
       setQuestion(data);
       setSelectedOption(null);
       setResult(null);
+      setTimeup(false);
     }
 
-    function onQuestionResult({ correctOptionId }: QuestionResult) {
+    function onQuestionResult({
+      correctOptionId,
+      resultsEndTime,
+    }: QuestionResult) {
       setQuestion((prev) =>
         prev
           ? {
@@ -81,7 +81,11 @@ export function Play() {
             }
           : prev,
       );
-      setResult({ correctOptionId: correctOptionId })
+      setResult({
+        correctOptionId: correctOptionId,
+        resultsEndTime: resultsEndTime,
+      });
+      setTimeup(true);
     }
 
     function onRanking(ranking: Ranking) {
@@ -99,8 +103,8 @@ export function Play() {
     };
   }, [socket]);
 
-  function handleAnswer(optionId: number) {
-    if (!question || !pin || selectedOption) return;
+  function handleAnswer(optionId: string) {
+    if (!question || !pin || selectedOption || timeUp) return;
 
     setSelectedOption(optionId);
 
@@ -154,32 +158,52 @@ export function Play() {
           </div>
 
           {result ? (
-            <div className={styles.result}>
-              {result.correctOptionId === selectedOption ? (
-                <p className={styles.correct}>✅ Você acertou!</p>
-              ) : (
-                <p className={styles.wrong}>❌ Você errou</p>
+            <>
+              <div className={styles.result}>
+                {result.correctOptionId === selectedOption ? (
+                  <p className={styles.correct}>✅ Você acertou!</p>
+                ) : (
+                  <p className={styles.wrong}>❌ Você errou</p>
+                )}
+              </div>
+              {result.resultsEndTime && (
+                <div className={styles.bar}>
+                  <Timer
+                    endTime={result.resultsEndTime}
+                    duration={10000}
+                    onFinish={() => setTimeup(false)}
+                  ></Timer>
+                </div>
               )}
-            </div>
+            </>
           ) : (
-            <div className={styles.options}>
-              {question.options.map((opt) => {
-                const isSelected = selectedOption === opt.id;
+            <>
+              <div className={styles.options}>
+                {question.options.map((opt) => {
+                  const isSelected = selectedOption === opt.id;
 
-                return (
-                  <button
-                    key={opt.id}
-                    className={`${styles.opt} ${
-                      isSelected ? styles.selected : ""
-                    }`}
-                    onClick={() => handleAnswer(opt.id)}
-                    disabled={!!selectedOption}
-                  >
-                    {opt.text}
-                  </button>
-                );
-              })}
-            </div>
+                  return (
+                    <button
+                      key={opt.id}
+                      className={`${styles.opt} ${
+                        isSelected ? styles.selected : ""
+                      }`}
+                      onClick={() => handleAnswer(opt.id)}
+                      disabled={!!selectedOption || timeUp}
+                    >
+                      {opt.text}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className={styles.bar}>
+                <Timer
+                  endTime={question.endTime}
+                  duration={15000}
+                  onFinish={() => setTimeup(true)}
+                ></Timer>
+              </div>
+            </>
           )}
         </>
       )}
