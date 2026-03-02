@@ -22,3 +22,13 @@ export type Option = {
   text: string;
   is_correct: boolean;
 };
+
+export type QuestionResult = {
+  correctOptionId: string;
+  resultsEndTime: number;
+};
+
+export type Ranking = {
+  name: string;
+  score: number;
+}[];

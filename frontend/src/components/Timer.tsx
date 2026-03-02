@@ -4,10 +4,9 @@ import styles from "./Timer.module.css";
 type TimerProps = {
   endTime: number;
   duration: number;
-  onFinish: () => void;
 };
 
-export function Timer({ endTime, duration, onFinish }: TimerProps) {
+export function Timer({ endTime, duration }: TimerProps) {
   const [remaining, setRemaining] = useState(endTime - Date.now());
 
   useEffect(() => {
@@ -17,14 +16,13 @@ export function Timer({ endTime, duration, onFinish }: TimerProps) {
       if (timeLeft <= 0) {
         setRemaining(0);
         clearInterval(interval);
-        onFinish();
       } else {
         setRemaining(timeLeft);
       }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [endTime, onFinish]);
+  }, [endTime]);
 
   const percentage = Math.max((remaining / duration) * 100, 0);
 

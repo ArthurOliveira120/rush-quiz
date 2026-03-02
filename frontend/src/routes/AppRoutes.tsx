@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { RoomProvider } from "../contexts/RoomContext";
 
 import { Index } from "../pages/Index";
 import { GamesList } from "../pages/GamesList";
@@ -17,14 +18,18 @@ export function AppRoutes() {
       <Route
         path="/play/:pin"
         element={
+          <RoomProvider>
             <Play />
+          </RoomProvider>
         }
       />
       <Route
         path="/host/:pin"
         element={
           <ProtectedRoute>
-            <Host />
+            <RoomProvider>
+              <Host />
+            </RoomProvider>
           </ProtectedRoute>
         }
       />
@@ -42,7 +47,7 @@ export function AppRoutes() {
         path="/games/new"
         element={
           <ProtectedRoute>
-            <NewGame type="create"/>
+            <NewGame type="create" />
           </ProtectedRoute>
         }
       />

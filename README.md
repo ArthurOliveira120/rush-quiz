@@ -9,7 +9,7 @@ Plataforma de quiz multiplayer em tempo real, inspirada no Kahoot, desenvolvida 
 
 - Criação de jogos e salas com PIN
 - Quiz multiplayer em tempo real
-- Controle de perguntas e fluxo pelo Host
+- Controle da sala pelo Host
 - Jogadores respondem pelo celular
 - Ranking final com top 5
 - Comunicação via WebSockets
@@ -74,7 +74,7 @@ npm run dev
 
 ## Status do projeto
 
-Em desenvolvimento ativo, com novas funcionalidades sendo adicionadas (melhorias visuais, tempo, pontuação, etc).
+Em desenvolvimento ativo, com novas funcionalidades sendo adicionadas (melhorias visuais,pontuação, etc).
 
 ## Autores
 

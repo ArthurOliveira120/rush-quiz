@@ -1,43 +1,23 @@
 import styles from "./Play.module.css";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-
-import { useSocket } from "../hooks/useSocket";
 import { useSession } from "../hooks/useSession";
 
 import { Timer } from "../components/Timer";
 
-import type { Question } from "../types/game";
-
-type QuestionResult = {
-  correctOptionId: string;
-  resultsEndTime: number;
-};
-
-type Ranking = {
-  name: string;
-  score: number;
-}[];
+import { useRoom } from "../hooks/useRoom";
 
 export function Play() {
-  const { pin } = useParams<{ pin: string }>();
   const { session } = useSession();
-  const socket = useSocket();
+  const { pin, question, result, ranking, roomState, emitPlayerJoin, emitSubmitAnswer } = useRoom();
 
   const joinedRef = useRef(false);
-
-  const [question, setQuestion] = useState<Question | null>(null);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-
-  const [result, setResult] = useState<QuestionResult | null>(null);
-  const [ranking, setRanking] = useState<{ name: string; score: number }[]>([]);
   
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
-  const [timeUp, setTimeup] = useState(false);
 
   const playerName = session
     ? session.user.user_metadata.username
-    : localStorage.getItem("player_name") || `Jogador ${socket.id}`;
+    : localStorage.getItem("player_name");
 
   useEffect(() => {
     if (session) {
@@ -48,73 +28,22 @@ export function Play() {
   }, [session]);
 
   useEffect(() => {
-    if (!pin || !socket.connected || joinedRef.current) return;
-
-    socket.emit("player_join", {
-      pin,
-      name: playerName,
-    });
-
-    joinedRef.current = true;
-  }, [pin, socket.connected]);
+  setSelectedOption(null);
+}, [question?.id]);
 
   useEffect(() => {
-    function onQuestion(data: Question) {
-      setQuestion(data);
-      setSelectedOption(null);
-      setResult(null);
-      setTimeup(false);
-    }
+    if (!pin || joinedRef.current) return;
 
-    function onQuestionResult({
-      correctOptionId,
-      resultsEndTime,
-    }: QuestionResult) {
-      setQuestion((prev) =>
-        prev
-          ? {
-              ...prev,
-              options: prev.options.map((opt) => ({
-                ...opt,
-                isCorrect: opt.id === correctOptionId,
-              })),
-            }
-          : prev,
-      );
-      setResult({
-        correctOptionId: correctOptionId,
-        resultsEndTime: resultsEndTime,
-      });
-      setTimeup(true);
-    }
-
-    function onRanking(ranking: Ranking) {
-      setRanking(ranking);
-    }
-
-    socket.on("question", onQuestion);
-    socket.on("question_result", onQuestionResult);
-    socket.on("ranking", onRanking);
-
-    return () => {
-      socket.off("question");
-      socket.off("question_result");
-      socket.off("ranking");
-    };
-  }, [socket]);
+    emitPlayerJoin(playerName);
+    joinedRef.current = true;
+  }, [pin]);
 
   function handleAnswer(optionId: string) {
-    if (!question || !pin || selectedOption || timeUp) return;
+    if (!question || !pin || selectedOption || roomState !== "question") return;
 
     setSelectedOption(optionId);
 
-    socket.emit("submit_answer", {
-      pin,
-      playerId: playerId,
-      playerName,
-      questionId: question.id,
-      optionId,
-    });
+    emitSubmitAnswer({ playerId, playerName, optionId });
   }
 
   return (
@@ -171,7 +100,6 @@ export function Play() {
                   <Timer
                     endTime={result.resultsEndTime}
                     duration={10000}
-                    onFinish={() => setTimeup(false)}
                   ></Timer>
                 </div>
               )}
@@ -189,7 +117,7 @@ export function Play() {
                         isSelected ? styles.selected : ""
                       }`}
                       onClick={() => handleAnswer(opt.id)}
-                      disabled={!!selectedOption || timeUp}
+                      disabled={!!selectedOption || roomState !== "question"}
                     >
                       {opt.text}
                     </button>
@@ -200,7 +128,6 @@ export function Play() {
                 <Timer
                   endTime={question.endTime}
                   duration={15000}
-                  onFinish={() => setTimeup(true)}
                 ></Timer>
               </div>
             </>

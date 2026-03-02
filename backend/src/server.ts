@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import express from "express";
 import cors from "cors";
 import { createServer } from "http";
@@ -20,7 +17,7 @@ const io = new Server(httpServer, { cors: { origin: "*" } });
 
 type Player = { name: string; socketId: string };
 type GameState = { started: boolean; currentQuestion: number };
-type Answer = { playerName: string; optionId: number };
+type Answer = { playerName: string; optionId: string };
 type QuestionState = {
   questionId: number;
   answers: Answer[];
@@ -34,6 +31,68 @@ const hostByPin: Record<string, string> = {};
 const socketToPlayer: Record<string, { pin: string; name: string }> = {};
 const answersByPin: Record<string, QuestionState | null> = {};
 const scoreByPin: Record<string, Record<string, number>> = {};
+
+async function nextQuestion(pin: string) {
+  const game = gameStateByPin[pin];
+    if (!game?.started) return;
+
+    const { data: session } = await supabase
+      .from("game_sessions")
+      .select("game_id")
+      .eq("pin", pin)
+      .single();
+
+    if (!session) return;
+
+    const { data: question } = await supabase
+      .from("questions")
+      .select("*")
+      .eq("game_id", session.game_id)
+      .order("order")
+      .range(game.currentQuestion, game.currentQuestion)
+      .single();
+
+    if (!question) {
+      const scores = scoreByPin[pin] || {};
+
+      const ranking = Object.entries(scores)
+        .map(([name, score]) => ({ name, score }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5);
+
+      io.to(pin).emit("game_finished", ranking);
+      return;
+    }
+
+    const { data: options } = await supabase
+      .from("options")
+      .select("id, text, order")
+      .eq("question_id", question.id)
+      .order("order");
+
+    const duration = 15000;
+    const endTime = Date.now() + duration;
+
+    answersByPin[pin] = {
+      questionId: question.id,
+      answers: [],
+      endTime,
+      finished: false,
+    };
+
+    game.currentQuestion++;
+
+    io.to(pin).emit("question", {
+      id: question.id,
+      text: question.text,
+      options,
+      endTime,
+    });
+
+    setTimeout(() => {
+      finishQuestion(pin);
+    }, duration);
+}
 
 async function finishQuestion(pin: string) {
   const state = answersByPin[pin];
@@ -68,6 +127,12 @@ async function finishQuestion(pin: string) {
   });
 
   answersByPin[pin] = null;
+
+  const duration = 10000;
+
+  setTimeout(() => {
+    nextQuestion(pin);
+  }, duration);
 }
 
 io.on("connection", (socket) => {
@@ -78,6 +143,8 @@ io.on("connection", (socket) => {
 
     socket.join(pin);
     hostByPin[pin] = socket.id;
+
+    socket.emit("room_joined", { role: "host" });
   });
 
   socket.on("player_join", ({ pin, name }) => {
@@ -93,76 +160,27 @@ io.on("connection", (socket) => {
 
     socketToPlayer[socket.id] = { pin, name };
 
+    socket.emit("room_joined", { role: "player" });
+
     io.to(pin).emit(
       "players_update",
       playersByPin[pin].map((p) => p.name),
     );
   });
 
-  socket.on("start_game", ({ pin }) => {
+  socket.on("start_game", async ({ pin }) => {
     if (hostByPin[pin] !== socket.id) return;
 
     gameStateByPin[pin] = { started: true, currentQuestion: 0 };
     scoreByPin[pin] = {};
 
-    io.to(pin).emit("game_started");
+    await nextQuestion(pin);
   });
 
   socket.on("next_question", async ({ pin }) => {
     if (hostByPin[pin] !== socket.id) return;
 
-    const game = gameStateByPin[pin];
-    if (!game?.started) return;
-
-    const { data: session } = await supabase
-      .from("game_sessions")
-      .select("game_id")
-      .eq("pin", pin)
-      .single();
-
-    if (!session) return;
-
-    const { data: question } = await supabase
-      .from("questions")
-      .select("*")
-      .eq("game_id", session.game_id)
-      .order("order")
-      .range(game.currentQuestion, game.currentQuestion)
-      .single();
-
-    if (!question) {
-      io.to(pin).emit("game_finished");
-      return;
-    }
-
-    const { data: options } = await supabase
-      .from("options")
-      .select("id, text, order")
-      .eq("question_id", question.id)
-      .order("order");
-
-    const duration = 15000;
-    const endTime = Date.now() + duration;
-
-    answersByPin[pin] = {
-      questionId: question.id,
-      answers: [],
-      endTime,
-      finished: false,
-    };
-
-    game.currentQuestion++;
-
-    io.to(pin).emit("question", {
-      id: question.id,
-      text: question.text,
-      options,
-      endTime,
-    });
-
-    setTimeout(() => {
-      finishQuestion(pin);
-    }, duration);
+    nextQuestion(pin);
   });
 
   socket.on(
@@ -193,19 +211,6 @@ io.on("connection", (socket) => {
     finishQuestion(pin);
   });
 
-  socket.on("show_ranking", ({ pin }) => {
-    if (hostByPin[pin] !== socket.id) return;
-
-    const scores = scoreByPin[pin] || {};
-
-    const ranking = Object.entries(scores)
-      .map(([name, score]) => ({ name, score }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
-
-    io.to(pin).emit("ranking", ranking);
-  });
-
   socket.on("disconnect", () => {
     const player = socketToPlayer[socket.id];
     if (!player) return;
@@ -223,6 +228,4 @@ io.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(3001, () =>
-  console.log("🚀 Backend rodando na porta 3001"),
-);
+httpServer.listen(3001, () => console.log("🚀 Backend rodando na porta 3001"));

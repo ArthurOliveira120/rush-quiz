@@ -1,102 +1,16 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-
-import { useSocket } from "../hooks/useSocket";
-import { useSession } from "../hooks/useSession";
-
 import styles from "./Host.module.css";
 import { Button } from "../components/Button";
 
-import type { Question } from "../types/game";
 import { Timer } from "../components/Timer";
-
-type QuestionResult = {
-  correctOptionId: string;
-  resultsEndTime: number;
-};
+import { useRoom } from "../hooks/useRoom";
+import { useEffect } from "react";
 
 export function Host() {
-  const { pin } = useParams<{ pin: string }>();
-  const { session } = useSession();
-  const socket = useSocket();
-  const navigate = useNavigate();
-
-  const [players, setPlayers] = useState<string[]>([]);
-  const [gameStarted, setGameStarted] = useState(false);
-
-  const [question, setQuestion] = useState<Question | null>(null);
-
-  const [results, setResults] = useState<QuestionResult | null>(null);
-  const [ranking, setRanking] = useState<{ name: string; score: number }[]>([]);
-
-  function handleStartGame() {
-    if (!pin) {
-      console.log("pin inválido");
-      return;
-    }
-
-    if (!socket.connected) {
-      console.log("Socket não conectado");
-      return;
-    }
-
-    console.log("emitindo o start game");
-    socket.emit("start_game", { pin });
-  }
-
-  function handleNextQuestion() {
-    socket.emit("next_question", { pin });
-  }
-
-  function handleFinishQuestion() {
-    if (!pin) return;
-    socket.emit("finish_question", { pin });
-  }
+  const { pin, players, roomState, question, result, ranking, emitHostJoin, emitStartGame } = useRoom();
 
   useEffect(() => {
-    if (!pin || !session) return;
-
-    socket.emit("host_join", { pin });
-
-    socket.on("players_update", setPlayers);
-
-    socket.on("game_started", () => {
-      setGameStarted(true);
-      socket.emit("next_question", { pin });
-    });
-
-    socket.on("question", (question: Question) => {
-      setResults(null);
-      setQuestion(question);
-    });
-
-    socket.on("join_error", (err) => {
-      alert(err.message);
-      navigate("/");
-    });
-
-    socket.on(
-      "question_result",
-      ({ correctOptionId, resultsEndTime }: QuestionResult) => {
-        setResults({ correctOptionId, resultsEndTime });
-      },
-    );
-
-    socket.on("game_finished", () => socket.emit("show_ranking", { pin }));
-
-    socket.on("ranking", setRanking);
-
-    return () => {
-      socket.off("host_joined");
-      socket.off("players_update");
-      socket.off("game_started");
-      socket.off("question");
-      socket.off("join_error");
-      socket.off("question_results");
-      socket.off("game_finished");
-      socket.off("ranking");
-    };
-  }, [pin, session, socket]);
+    emitHostJoin();
+  }, [pin]);
 
   return (
     <div className={styles.container}>
@@ -115,12 +29,12 @@ export function Host() {
       </div>
 
       <div className={styles.controls}>
-        {!gameStarted && (
+        {roomState !== "question" && (
           <Button
             variant="primary"
             size="lg"
             disabled={players.length === 0}
-            onClick={handleStartGame}
+            onClick={emitStartGame}
           >
             Iniciar Jogo
           </Button>
@@ -139,24 +53,22 @@ export function Host() {
             ))}
           </div>
 
-          {!results && (
+          {!result && (
             <div className={styles.bar}>
               <Timer
                 endTime={question.endTime}
                 duration={15000}
-                onFinish={handleFinishQuestion}
               ></Timer>
             </div>
           )}
         </div>
       )}
 
-      {results && (
+      {result && (
         <div className={styles.bar}>
           <Timer
-            endTime={results.resultsEndTime}
+            endTime={result.resultsEndTime}
             duration={10000}
-            onFinish={handleNextQuestion}
           ></Timer>
         </div>
       )}
